@@ -12,13 +12,10 @@ ezButton pedalButton(D3);        // create ezButton object that attach to pin D3
 
 CRGB leds[NUM_LEDS]; // for FastLed
 
-bool rideIsAllowed = 1;
-
 const long ledTimout = 3000;    // LED timeout
 const long rideDuration = 5000; // duration of one ride in milliseconds
 
 unsigned long ledOffTimer = 0;
-unsigned long rideStartTime = 0;
 unsigned long rideEndtTime = 0;
 unsigned long rideTimeRemaining = 0;
 
@@ -48,7 +45,6 @@ void loop()
   {
     rideTimeRemaining = 0;
     digitalWrite(PowerController, LOW); // disable MOSFET Power Controller
-    rideStartTime = 0;
   }
   else
   {
@@ -71,7 +67,6 @@ void loop()
     }
     else // starts the ride
     {
-      rideStartTime = currentTime;
       rideEndtTime = currentTime + rideDuration;
       rideTimeRemaining = rideEndtTime - currentTime;
       ledOffTimer = rideEndtTime + ledTimout;
@@ -102,7 +97,6 @@ void loop()
   if (pedalButton.isReleased())
   {
     digitalWrite(PowerController, LOW);
-    // Serial.println("Pedal is released"); // for debug
   }
 
   /*
