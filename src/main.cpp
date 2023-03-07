@@ -1,20 +1,26 @@
 #include <Arduino.h>
+#include <DFRobot_INA219.h>
 #include <ezButton.h> //ezButton Library
 #include <FastLED.h>  //FastLED Library
+#include <Wire.h>
 
 #define DEBOUNCE_TIME 50   // the debounce time in milliseconds
 #define NUM_LEDS 1         // for FastLed
 #define DATA_PIN 5         // for FastLed
 #define PowerController D7 // define MOSFET Power Controller to D7
 
+DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
+CRGB leds[NUM_LEDS];             // for FastLed
 ezButton coinAcceptorButton(D2); // create ezButton object that attach to pin D2
 ezButton pedalButton(D3);        // create ezButton object that attach to pin D3
 
-CRGB leds[NUM_LEDS]; // for FastLed
+float ina219Reading_mA = 1000;
+float extMeterReading_mA = 1000;
 
 const long ledTimout = 3000;    // LED timeout
 const long rideDuration = 5000; // duration of one ride in milliseconds
 
+unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
 unsigned long rideEndtTime = 0;
 unsigned long rideTimeRemaining = 0;
@@ -28,6 +34,17 @@ void setup()
   leds[0] = CRGB::Black;
   FastLED.show();
   pinMode(PowerController, OUTPUT); // set D7 to output
+  while (!Serial)
+    ;
+
+  Serial.println();
+  while (ina219.begin() != true)
+  {
+    Serial.println("INA219 begin faild");
+    delay(2000);
+  }
+  ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
+  Serial.println();
 }
 
 void loop()
@@ -125,4 +142,25 @@ void loop()
     FastLED.show();
   }
 
+  /*
+Wattmeter
+*/
+
+  if (lastWattmeterReading < currentTime)
+  {
+    Serial.print("BusVoltage:   ");
+    Serial.print(ina219.getBusVoltage_V(), 2);
+    Serial.println("V");
+    Serial.print("ShuntVoltage: ");
+    Serial.print(ina219.getShuntVoltage_mV(), 3);
+    Serial.println("mV");
+    Serial.print("Current:      ");
+    Serial.print(ina219.getCurrent_mA(), 1);
+    Serial.println("mA");
+    Serial.print("Power:        ");
+    Serial.print(ina219.getPower_mW(), 1);
+    Serial.println("mW");
+    Serial.println("");
+    lastWattmeterReading = currentTime + 1000;
+  }
 }
