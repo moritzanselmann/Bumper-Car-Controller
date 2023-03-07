@@ -36,7 +36,7 @@ void loop()
   pedalButton.loop();
 
   unsigned long currentTime = millis();
-
+  
   /*
   Time Checker
   */
