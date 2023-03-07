@@ -165,9 +165,8 @@ Wattmeter
     lastWattmeterReading = currentTime + 1000;
   }
 
-  if (ina219.getCurrent_mA() > maxAllowedCurrent)
+  if (ina219.getCurrent_mA() > maxAllowedCurrent) // disable power controller if Current to high
   {
     digitalWrite(PowerController, LOW);
   }
-  
 }
