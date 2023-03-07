@@ -16,6 +16,7 @@ ezButton pedalButton(D3);        // create ezButton object that attach to pin D3
 
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
+float maxAllowedCurrent = 8000; // mamimum allowed current im mA
 
 const long ledTimout = 3000;    // LED timeout
 const long rideDuration = 5000; // duration of one ride in milliseconds
@@ -98,7 +99,7 @@ void loop()
 
   if (pedalButton.isPressed()) // if the pedal is pressed and a interval is running
   {
-    if (rideTimeRemaining != 0)
+    if (rideTimeRemaining != 0 && ina219.getCurrent_mA() < maxAllowedCurrent)
     {
       digitalWrite(PowerController, HIGH); // switch MOSFET Power Controller with pedal
       // Serial.println("Pedal is pressed and timer is running");
@@ -162,5 +163,10 @@ Wattmeter
     Serial.println("mW");
     Serial.println("");
     lastWattmeterReading = currentTime + 1000;
+  }
+
+  if (ina219.getCurrent_mA() > maxAllowedCurrent)
+  {
+    digitalWrite(PowerController, LOW);
   }
 }
