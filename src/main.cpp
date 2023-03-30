@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <DFRobot_INA219.h>
+#include <DFRobot_INA219.h> //DFRobot I2C Digital Wattmeter
 #include <ezButton.h> //ezButton Library
 #include <FastLED.h>  //FastLED Library
 #include <Wire.h>
