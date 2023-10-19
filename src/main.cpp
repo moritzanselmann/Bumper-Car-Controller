@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <DFRobot_INA219.h> //DFRobot I2C Digital Wattmeter
-#include <ezButton.h> //ezButton Library
-#include <FastLED.h>  //FastLED Library
+#include <ezButton.h>       //ezButton Library
+#include <FastLED.h>        //FastLED Library
 #include <Wire.h>
 
 #define DEBOUNCE_TIME 50   // the debounce time in milliseconds
@@ -39,11 +39,11 @@ void setup()
     ;
 
   Serial.println();
-  while (ina219.begin() != true)
-  {
-    Serial.println("INA219 begin faild");
-    delay(2000);
-  }
+  // while (ina219.begin() != true)
+  //{
+  // Serial.println("INA219 begin faild");
+  // delay(2000);
+  //}
   ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
   Serial.println();
 }
