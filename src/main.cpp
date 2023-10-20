@@ -6,7 +6,8 @@
 
 #define DEBOUNCE_TIME 50   // the debounce time in milliseconds
 #define NUM_LEDS 1         // for FastLed
-#define DATA_PIN 5         // for FastLed
+#define DATA_PIN2 5        // FastLed builtin RGB LED
+#define DATA_PIN1 D0       // FastLed external LED
 #define PowerController D7 // define MOSFET Power Controller to D7
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
@@ -18,8 +19,8 @@ float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
 float maxAllowedCurrent = 8000; // mamimum allowed current im mA
 
-const long ledTimout = 3000;    // LED timeout
-const long rideDuration = 5000; // duration of one ride in milliseconds
+const long ledTimout = 3000;     // LED timeout
+const long rideDuration = 10000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
@@ -31,7 +32,8 @@ void setup()
   Serial.begin(115200);
   coinAcceptorButton.setDebounceTime(DEBOUNCE_TIME); // set debounce time to DEBOUNCE_TIME milliseconds
   pedalButton.setDebounceTime(DEBOUNCE_TIME);        // set debounce time to DEBOUNCE_TIME milliseconds
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, DATA_PIN1>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, DATA_PIN2>(leds, NUM_LEDS);
   leds[0] = CRGB::Black;
   FastLED.show();
   pinMode(PowerController, OUTPUT); // set D7 to output
