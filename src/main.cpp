@@ -15,12 +15,16 @@ CRGB leds[NUM_LEDS];             // for FastLed
 ezButton coinAcceptorButton(D2); // create ezButton object that attach to pin D2
 ezButton pedalButton(D3);        // create ezButton object that attach to pin D3
 
+bool rideAllowed = false;
+
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
-float maxAllowedCurrent = 8000; // mamimum allowed current im mA
+float voltageReading = 0;           // Voltage reading of the battery
+float batteryCuttOffVoltage = 10; // Voltage to disable the ride
+float batteryLowVoltage = 11;     // minimal Voltage to start a ride
 
 const long ledTimout = 3000;     // LED timeout
-const long rideDuration = 10000; // duration of one ride in milliseconds
+const long rideDuration = 30000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
@@ -37,15 +41,6 @@ void setup()
   leds[0] = CRGB::Black;
   FastLED.show();
   pinMode(PowerController, OUTPUT); // set D7 to output
-  while (!Serial)
-    ;
-
-  Serial.println();
-  // while (ina219.begin() != true)
-  //{
-  // Serial.println("INA219 begin faild");
-  // delay(2000);
-  //}
   ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
   Serial.println();
 }
@@ -99,9 +94,9 @@ void loop()
   Pedal Button
   */
 
-  if (pedalButton.isPressed()) // if the pedal is pressed and a interval is running
+  if (pedalButton.isPressed() && rideAllowed != false) // if the pedal is pressed and a interval is running
   {
-    if (rideTimeRemaining != 0 && ina219.getCurrent_mA() < maxAllowedCurrent)
+    if (rideTimeRemaining != 0)
     {
       digitalWrite(PowerController, HIGH); // switch MOSFET Power Controller with pedal
       // Serial.println("Pedal is pressed and timer is running");
@@ -151,24 +146,32 @@ Wattmeter
 
   if (lastWattmeterReading < currentTime)
   {
-    Serial.print("BusVoltage:   ");
-    Serial.print(ina219.getBusVoltage_V(), 2);
+    Serial.print("Battery Voltage:   ");
+    Serial.print(ina219.getBusVoltage_V());
     Serial.println("V");
-    Serial.print("ShuntVoltage: ");
-    Serial.print(ina219.getShuntVoltage_mV(), 3);
-    Serial.println("mV");
-    Serial.print("Current:      ");
-    Serial.print(ina219.getCurrent_mA(), 1);
-    Serial.println("mA");
-    Serial.print("Power:        ");
-    Serial.print(ina219.getPower_mW(), 1);
-    Serial.println("mW");
+    // Serial.print("ShuntVoltage: ");
+    // Serial.print(ina219.getShuntVoltage_mV(), 3);
+    // Serial.println("mV");
+    // Serial.print("Current:      ");
+    // Serial.print(ina219.getCurrent_mA(), 1);
+    // Serial.println("mA");
+    // Serial.print("Power:        ");
+    // Serial.print(ina219.getPower_mW(), 1);
+    // Serial.println("mW");
+    // Serial.println("");
+    voltageReading = ina219.getBusVoltage_V();
+    Serial.print("Ride Allowed:      ");
+    Serial.println(rideAllowed);
     Serial.println("");
-    lastWattmeterReading = currentTime + 1000;
+    lastWattmeterReading = currentTime + 5000;
   }
-
-  if (ina219.getCurrent_mA() > maxAllowedCurrent) // disable power controller if Current to high
+  if (voltageReading > batteryLowVoltage)
   {
+    rideAllowed = true;
+  }
+  if (voltageReading < batteryCuttOffVoltage)
+  {
+    rideAllowed = false;
     digitalWrite(PowerController, LOW);
   }
 }
