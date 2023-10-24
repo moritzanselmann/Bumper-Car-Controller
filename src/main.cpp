@@ -4,11 +4,12 @@
 #include <FastLED.h>        //FastLED Library
 #include <Wire.h>
 
-#define DEBOUNCE_TIME 50   // the debounce time in milliseconds
+#define DEBOUNCE_TIME 25   // the debounce time in milliseconds
 #define NUM_LEDS 1         // for FastLed
 #define DATA_PIN2 5        // FastLed builtin RGB LED
 #define DATA_PIN1 D0       // FastLed external LED
 #define PowerController D7 // define MOSFET Power Controller to D7
+#define BRIGHTNESS 16
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
 CRGB leds[NUM_LEDS];             // for FastLed
@@ -24,7 +25,7 @@ float batteryCuttOffVoltage = 10; // Voltage to disable the ride
 float batteryLowVoltage = 11;     // minimal Voltage to start a ride
 
 const long ledTimout = 3000;     // LED timeout
-const long rideDuration = 30000; // duration of one ride in milliseconds
+const long rideDuration = 180000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
@@ -38,6 +39,7 @@ void setup()
   pedalButton.setDebounceTime(DEBOUNCE_TIME);        // set debounce time to DEBOUNCE_TIME milliseconds
   FastLED.addLeds<NEOPIXEL, DATA_PIN1>(leds, NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN2>(leds, NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
   leds[0] = CRGB::Black;
   FastLED.show();
   pinMode(PowerController, OUTPUT); // set D7 to output
