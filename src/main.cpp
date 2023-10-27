@@ -20,11 +20,11 @@ bool rideAllowed = false;
 
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
-float voltageReading = 0;           // Voltage reading of the battery
+float voltageReading = 0;         // Voltage reading of the battery
 float batteryCuttOffVoltage = 10; // Voltage to disable the ride
 float batteryLowVoltage = 11;     // minimal Voltage to start a ride
 
-const long ledTimout = 3000;     // LED timeout
+const long ledTimout = 3000;      // LED timeout
 const long rideDuration = 180000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
