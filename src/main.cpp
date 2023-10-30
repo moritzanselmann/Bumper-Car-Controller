@@ -4,6 +4,16 @@
 #include <FastLED.h>        //FastLED Library
 #include <Wire.h>
 
+#define DEBUG 0
+
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+
 #define DEBOUNCE_TIME 25   // the debounce time in milliseconds
 #define NUM_LEDS 1         // for FastLed
 #define DATA_PIN2 5        // FastLed builtin RGB LED
@@ -44,7 +54,7 @@ void setup()
   FastLED.show();
   pinMode(PowerController, OUTPUT); // set D7 to output
   ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
-  Serial.println();
+  Serial.println("SETUP COMPLETE");
 }
 
 void loop()
@@ -79,16 +89,16 @@ void loop()
       rideTimeRemaining = rideEndtTime + rideDuration;
       rideEndtTime = rideTimeRemaining;
       ledOffTimer = rideEndtTime + ledTimout;
-      Serial.print("Timer has extended. New time remaining ");
-      Serial.println((rideEndtTime - currentTime) / 1000);
+      debug("Timer has extended. New time remaining ");
+      debugln((rideEndtTime - currentTime) / 1000);
     }
     else // starts the ride
     {
       rideEndtTime = currentTime + rideDuration;
       rideTimeRemaining = rideEndtTime - currentTime;
       ledOffTimer = rideEndtTime + ledTimout;
-      Serial.print("Timer has started. Time Remaining ");
-      Serial.println(rideDuration / 1000);
+      debug("Timer has started. Time Remaining ");
+      debugln(rideDuration / 1000);
     }
   }
 
@@ -101,13 +111,12 @@ void loop()
     if (rideTimeRemaining != 0)
     {
       digitalWrite(PowerController, HIGH); // switch MOSFET Power Controller with pedal
-      // Serial.println("Pedal is pressed and timer is running");
-      Serial.print("Pedal is pressed. Time remaining ");
-      Serial.println(rideTimeRemaining / 1000);
+      debug("Pedal is pressed. Time remaining ");
+      debugln(rideTimeRemaining / 1000);
     }
     else
     {
-      // Serial.println("Pedal is pressed but timer has expired");
+      debugln("Pedal is pressed but timer has expired");
     }
   }
 
@@ -148,23 +157,15 @@ Wattmeter
 
   if (lastWattmeterReading < currentTime)
   {
-    Serial.print("Battery Voltage:   ");
-    Serial.print(ina219.getBusVoltage_V());
-    Serial.println("V");
-    // Serial.print("ShuntVoltage: ");
-    // Serial.print(ina219.getShuntVoltage_mV(), 3);
-    // Serial.println("mV");
-    // Serial.print("Current:      ");
-    // Serial.print(ina219.getCurrent_mA(), 1);
-    // Serial.println("mA");
-    // Serial.print("Power:        ");
-    // Serial.print(ina219.getPower_mW(), 1);
-    // Serial.println("mW");
-    // Serial.println("");
+    debug("Battery Voltage:   ");
+    debug(ina219.getBusVoltage_V());
+    debugln("V");
+
     voltageReading = ina219.getBusVoltage_V();
-    Serial.print("Ride Allowed:      ");
-    Serial.println(rideAllowed);
-    Serial.println("");
+
+    debug("Ride Allowed:      ");
+    debugln(rideAllowed);
+    debugln("");
     lastWattmeterReading = currentTime + 5000;
   }
   if (voltageReading > batteryLowVoltage)
