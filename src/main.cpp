@@ -14,7 +14,7 @@
 #endif
 
 #define DEBOUNCE_TIME 25   // the debounce time in milliseconds
-#define NUM_LEDS 1         // for FastLed
+#define NUM_LEDS 1         // number of LED´s for FastLed
 #define DATA_PIN2 5        // FastLed builtin RGB LED
 #define DATA_PIN1 D0       // FastLed external LED
 #define PowerController D7 // define MOSFET Power Controller to D7
