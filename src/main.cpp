@@ -1,10 +1,9 @@
-#include <Arduino.h>
+#include <Arduino.h>        //include Arduino
 #include <DFRobot_INA219.h> //DFRobot I2C Digital Wattmeter
 #include <ezButton.h>       //ezButton Library
 #include <FastLED.h>        //FastLED Library
-#include <Wire.h>
 
-#define DEBUG 1
+#define DEBUG 1 // select 1 for debug messages on the serial monitor or 0 to disable
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
@@ -21,16 +20,16 @@
 #define PowerController D7 // define MOSFET Power Controller to D7
 #define BRIGHTNESS 16
 
-DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
-CRGB leds[NUM_LEDS];             // for FastLed
-ezButton coinAcceptorButton(D2); // create ezButton object that attach to pin D2
-ezButton pedalButton(D3);        // create ezButton object that attach to pin D3
+DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
+CRGB leds[NUM_LEDS];                                   // for FastLed
+ezButton coinAcceptorButton(D2);                       // create ezButton object that attach to pin D2
+ezButton pedalButton(D3);                              // create ezButton object that attach to pin D3
 
-bool rideAllowed = false;
+bool rideAllowed = false; 
 
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
-float voltageReading = 0;         // Voltage reading of the battery
+float voltageReading = 0;        // Voltage reading of the battery
 float batteryCuttOffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;     // minimal Voltage to start a ride
 
