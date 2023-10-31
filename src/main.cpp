@@ -4,7 +4,7 @@
 #include <FastLED.h>        //FastLED Library
 #include <Wire.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
@@ -31,8 +31,8 @@ bool rideAllowed = false;
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
 float voltageReading = 0;         // Voltage reading of the battery
-float batteryCuttOffVoltage = 10; // Voltage to disable the ride
-float batteryLowVoltage = 11;     // minimal Voltage to start a ride
+float batteryCuttOffVoltage = 0; // Voltage to disable the ride
+float batteryLowVoltage = 0;     // minimal Voltage to start a ride
 
 const long ledTimout = 3000;      // LED timeout
 const long rideDuration = 180000; // duration of one ride in milliseconds
