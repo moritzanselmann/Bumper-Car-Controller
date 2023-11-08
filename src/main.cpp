@@ -1,9 +1,25 @@
+/*
+
+Project to control a bumper car using a ESP32 microcontroller.
+The car is using a 12V car battery to run a Bosch starter Motor.
+When a coin is inserted in a coin acceptor a pedal becomes active to drive the car.
+Key components are:
+                      DFRobot FireBeetle 2 ESP32-E https://www.dfrobot.com/product-2231.html
+                      DFRobot Gravity: IO Shield for FireBeetle 2 https://www.dfrobot.com/product-2395.html
+                      DFRobot Gravity: I2C Digital Wattmeter https://www.dfrobot.com/product-1827.html
+                      DFRobot Gravity: Digital 10A Relay Module https://www.dfrobot.com/product-1572.html
+                      DD2712SA 2.5A DC DC Step Down Converter Module
+                      generic coin acceptor
+                      Neopixel WS2812B RGB LED
+
+*/
+
 #include <Arduino.h>        //include Arduino
 #include <DFRobot_INA219.h> //DFRobot I2C Digital Wattmeter
 #include <ezButton.h>       //ezButton Library
 #include <FastLED.h>        //FastLED Library
 
-#define DEBUG 1 // select 1 for debug messages on the serial monitor or 0 to disable
+#define DEBUG 1 // 1 for debug messages on the serial monitor or 0 to disable
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
@@ -13,11 +29,11 @@
 #define debugln(x)
 #endif
 
-#define DEBOUNCE_TIME 25   // the debounce time in milliseconds
-#define NUM_LEDS 1         // number of LED´s for FastLed
-#define DATA_PIN2 5        // FastLed builtin RGB LED
-#define DATA_PIN1 D0       // FastLed external LED
-#define motorRelais D7 // define MOSFET Power Controller to D7
+#define DEBOUNCE_TIME 25 // the debounce time in milliseconds
+#define NUM_LEDS 1       // number of LED´s for FastLed
+#define DATA_PIN2 5      // FastLed builtin RGB LED
+#define DATA_PIN1 D0     // FastLed external LED
+#define motorRelais D7   // define MOSFET Power Controller to D7
 #define BRIGHTNESS 16
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
@@ -25,7 +41,7 @@ CRGB leds[NUM_LEDS];                                   // for FastLed
 ezButton coinAcceptorButton(D2);                       // create ezButton object that attach to pin D2
 ezButton pedalButton(D3);                              // create ezButton object that attach to pin D3
 
-bool rideAllowed = false; 
+bool rideAllowed = false;
 
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
