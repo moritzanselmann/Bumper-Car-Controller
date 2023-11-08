@@ -17,7 +17,7 @@
 #define NUM_LEDS 1         // number of LED´s for FastLed
 #define DATA_PIN2 5        // FastLed builtin RGB LED
 #define DATA_PIN1 D0       // FastLed external LED
-#define PowerController D7 // define MOSFET Power Controller to D7
+#define motorRelais D7 // define MOSFET Power Controller to D7
 #define BRIGHTNESS 16
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
@@ -51,7 +51,7 @@ void setup()
   FastLED.setBrightness(BRIGHTNESS);
   leds[0] = CRGB::Black;
   FastLED.show();
-  pinMode(PowerController, OUTPUT); // set D7 to output
+  pinMode(motorRelais, OUTPUT); // set D7 to output
   ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
   Serial.println("SETUP COMPLETE");
 }
@@ -70,7 +70,7 @@ void loop()
   if (currentTime > rideEndtTime)
   {
     rideTimeRemaining = 0;
-    digitalWrite(PowerController, LOW); // disable MOSFET Power Controller
+    digitalWrite(motorRelais, LOW); // disable MOSFET Power Controller
   }
   else
   {
@@ -109,7 +109,7 @@ void loop()
   {
     if (rideTimeRemaining != 0)
     {
-      digitalWrite(PowerController, HIGH); // switch MOSFET Power Controller with pedal
+      digitalWrite(motorRelais, HIGH); // switch MOSFET Power Controller with pedal
       debug("Pedal is pressed. Time remaining ");
       debugln(rideTimeRemaining / 1000);
     }
@@ -121,7 +121,7 @@ void loop()
 
   if (pedalButton.isReleased())
   {
-    digitalWrite(PowerController, LOW);
+    digitalWrite(motorRelais, LOW);
   }
 
   /*
@@ -174,6 +174,6 @@ Wattmeter
   if (voltageReading < batteryCuttOffVoltage)
   {
     rideAllowed = false;
-    digitalWrite(PowerController, LOW);
+    digitalWrite(motorRelais, LOW);
   }
 }
