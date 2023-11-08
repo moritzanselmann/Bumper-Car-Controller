@@ -34,8 +34,8 @@ Key components are:
 
 #define NUM_LEDS 1       // number of LED´s for FastLed
 #define BRIGHTNESS 16    // set the brightness of the LED`S from 0-255
-#define DATA_PIN2 5      // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DATA_PIN1 D0     // PIN for the external Neopixel WS2812B RGB LED for FastLED
+#define DATA_PIN2 5      // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DEBOUNCE_TIME 25 // the debounce time in milliseconds for the coin acceptor
 #define motorRelais D7   // PIN for the Relay Module
 
@@ -46,8 +46,6 @@ ezButton pedalButton(D3);                              // create ezButton object
 
 bool rideAllowed = false;
 
-float ina219Reading_mA = 1000;
-float extMeterReading_mA = 1000;
 float voltageReading = 0;        // Voltage reading of the battery
 float batteryCuttOffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;     // minimal Voltage to start a ride
@@ -63,15 +61,14 @@ unsigned long rideTimeRemaining = 0;
 void setup()
 {
   Serial.begin(115200);
-  coinAcceptor.setDebounceTime(DEBOUNCE_TIME); // set debounce time to DEBOUNCE_TIME milliseconds
-  pedalButton.setDebounceTime(DEBOUNCE_TIME);  // set debounce time to DEBOUNCE_TIME milliseconds
+  coinAcceptor.setDebounceTime(DEBOUNCE_TIME);
+  pedalButton.setDebounceTime(DEBOUNCE_TIME);
   FastLED.addLeds<NEOPIXEL, DATA_PIN1>(leds, NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN2>(leds, NUM_LEDS);
   FastLED.setBrightness(BRIGHTNESS);
   leds[0] = CRGB::Black;
   FastLED.show();
-  pinMode(motorRelais, OUTPUT); // set D7 to output
-  ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
+  pinMode(motorRelais, OUTPUT); 
   Serial.println("SETUP COMPLETE");
 }
 
