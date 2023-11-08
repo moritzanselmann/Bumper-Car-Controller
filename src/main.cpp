@@ -3,15 +3,17 @@
 Project to control a bumper car using a ESP32 microcontroller.
 The car is using a 12V car battery to run a Bosch starter Motor.
 When a coin is inserted in a coin acceptor a pedal becomes active to drive the car.
-Key components are:
-                  DFRobot FireBeetle 2 ESP32-E https://www.dfrobot.com/product-2231.html
-                  DFRobot Gravity: IO Shield for FireBeetle 2 https://www.dfrobot.com/product-2395.html
-                  DFRobot Gravity: I2C Digital Wattmeter https://www.dfrobot.com/product-1827.html
-                  DFRobot Gravity: Digital 10A Relay Module https://www.dfrobot.com/product-1572.html
-                  DD2712SA 2.5A DC DC Step Down Converter Module
-                  Neopixel WS2812B RGB LED
-                  generic coin acceptor
 
+Key components are:
+
+              DFRobot FireBeetle 2 ESP32-E https://www.dfrobot.com/product-2231.html
+              DFRobot Gravity: IO Shield for FireBeetle 2 https://www.dfrobot.com/product-2395.html
+              DFRobot Gravity: I2C Digital Wattmeter https://www.dfrobot.com/product-1827.html
+              DFRobot Gravity: Digital 10A Relay Module https://www.dfrobot.com/product-1572.html
+              DD2712SA 2.5A DC DC Step Down Converter Module
+              Neopixel WS2812B RGB LED
+              generic coin acceptor
+              magnetic contact switch for the pedal
 
 */
 
@@ -30,17 +32,17 @@ Key components are:
 #define debugln(x)
 #endif
 
-#define DEBOUNCE_TIME 25 // the debounce time in milliseconds
 #define NUM_LEDS 1       // number of LED´s for FastLed
-#define DATA_PIN2 5      // FastLed builtin RGB LED
-#define DATA_PIN1 D0     // FastLed external LED
-#define motorRelais D7   // define MOSFET Power Controller to D7
-#define BRIGHTNESS 16
+#define BRIGHTNESS 16    // set the brightness of the LED`S from 0-255
+#define DATA_PIN2 5      // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
+#define DATA_PIN1 D0     // PIN for the external Neopixel WS2812B RGB LED for FastLED
+#define DEBOUNCE_TIME 25 // the debounce time in milliseconds for the coin acceptor
+#define motorRelais D7   // PIN for the Relay Module
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
 CRGB leds[NUM_LEDS];                                   // for FastLed
-ezButton coinAcceptorButton(D2);                       // create ezButton object that attach to pin D2
-ezButton pedalButton(D3);                              // create ezButton object that attach to pin D3
+ezButton coinAcceptor(D2);                             // create ezButton object for the coin acceptor attached to pin D2
+ezButton pedalButton(D3);                              // create ezButton object for the pedal magnetic switch attached to pin D3
 
 bool rideAllowed = false;
 
@@ -61,8 +63,8 @@ unsigned long rideTimeRemaining = 0;
 void setup()
 {
   Serial.begin(115200);
-  coinAcceptorButton.setDebounceTime(DEBOUNCE_TIME); // set debounce time to DEBOUNCE_TIME milliseconds
-  pedalButton.setDebounceTime(DEBOUNCE_TIME);        // set debounce time to DEBOUNCE_TIME milliseconds
+  coinAcceptor.setDebounceTime(DEBOUNCE_TIME); // set debounce time to DEBOUNCE_TIME milliseconds
+  pedalButton.setDebounceTime(DEBOUNCE_TIME);  // set debounce time to DEBOUNCE_TIME milliseconds
   FastLED.addLeds<NEOPIXEL, DATA_PIN1>(leds, NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN2>(leds, NUM_LEDS);
   FastLED.setBrightness(BRIGHTNESS);
@@ -75,7 +77,7 @@ void setup()
 
 void loop()
 {
-  coinAcceptorButton.loop();
+  coinAcceptor.loop();
   pedalButton.loop();
 
   unsigned long currentTime = millis();
@@ -98,7 +100,7 @@ void loop()
   Coin Acceptor Button
   */
 
-  if (coinAcceptorButton.isPressed())
+  if (coinAcceptor.isPressed())
   {
     if (currentTime < rideEndtTime) // extends the duration of the ride by const long rideDuration
     {
