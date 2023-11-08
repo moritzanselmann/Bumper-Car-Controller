@@ -37,7 +37,7 @@ Key components are:
 #define DATA_PIN1 D0     // PIN for the external Neopixel WS2812B RGB LED for FastLED
 #define DATA_PIN2 5      // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DEBOUNCE_TIME 25 // the debounce time in milliseconds for the coin acceptor
-#define motorRelais D7   // PIN for the Relay Module
+#define motorRelais D7   // PIN for the relay module
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
 CRGB leds[NUM_LEDS];                                   // for FastLed
@@ -68,8 +68,9 @@ void setup()
   FastLED.setBrightness(BRIGHTNESS);
   leds[0] = CRGB::Black;
   FastLED.show();
-  pinMode(motorRelais, OUTPUT); 
+  pinMode(motorRelais, OUTPUT);
   Serial.println("SETUP COMPLETE");
+  Serial.println(" ");
 }
 
 void loop()
@@ -80,26 +81,26 @@ void loop()
   unsigned long currentTime = millis();
 
   /*
-  Time Checker
+  checks if the duration of the ride has passed
   */
 
   if (currentTime > rideEndtTime)
   {
     rideTimeRemaining = 0;
-    digitalWrite(motorRelais, LOW); // disable MOSFET Power Controller
+    digitalWrite(motorRelais, LOW); // if durartion has passed the motor will be disabled
   }
   else
   {
-    rideTimeRemaining = rideEndtTime - currentTime;
+    rideTimeRemaining = rideEndtTime - currentTime; // updates the time remaining until the ride ends
   }
 
   /*
-  Coin Acceptor Button
+  Coin Acceptor, starts the ride or extends one if allready running
   */
 
   if (coinAcceptor.isPressed())
   {
-    if (currentTime < rideEndtTime) // extends the duration of the ride by const long rideDuration
+    if (currentTime < rideEndtTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
     {
       rideTimeRemaining = rideEndtTime + rideDuration;
       rideEndtTime = rideTimeRemaining;
@@ -107,7 +108,7 @@ void loop()
       debug("Timer has extended. New time remaining ");
       debugln((rideEndtTime - currentTime) / 1000);
     }
-    else // starts the ride
+    else // starts the ride if no ride is active
     {
       rideEndtTime = currentTime + rideDuration;
       rideTimeRemaining = rideEndtTime - currentTime;
@@ -118,14 +119,14 @@ void loop()
   }
 
   /*
-  Pedal Button
+  Pedal Button, control the relay module with the pedal to drive the car
   */
 
-  if (pedalButton.isPressed() && rideAllowed != false) // if the pedal is pressed and a interval is running
+  if (pedalButton.isPressed() && rideAllowed != false) // if the pedal is pressed and a ride is running
   {
     if (rideTimeRemaining != 0)
     {
-      digitalWrite(motorRelais, HIGH); // switch MOSFET Power Controller with pedal
+      digitalWrite(motorRelais, HIGH);
       debug("Pedal is pressed. Time remaining ");
       debugln(rideTimeRemaining / 1000);
     }
