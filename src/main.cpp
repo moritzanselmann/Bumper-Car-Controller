@@ -52,13 +52,16 @@ float voltageReading = 0;        // Voltage reading of the battery
 float batteryCuttOffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;     // minimal Voltage to start a ride
 
-const long ledTimout = 3000;     // LED timeout
-const long rideDuration = 10000; // duration of one ride in milliseconds
+const long ledTimout = 10000;    // LED timeout
+const long rideDuration = 20000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
 unsigned long rideEndtTime = 0;
 unsigned long rideTimeRemaining = 0;
+
+uint8_t startIndex;
+uint8_t colorIndex;
 
 void setup()
 {
@@ -101,7 +104,7 @@ void loop()
   Coin Acceptor, starts the ride or extends one if allready running
   */
 
-  if (coinAcceptor.isPressed())
+  if (coinAcceptor.isPressed() && rideAllowed != false)
   {
     if (currentTime < rideEndtTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
     {
@@ -148,17 +151,17 @@ void loop()
   Status Internal LED
   */
 
-  if (rideTimeRemaining > 3000)
+  if (rideTimeRemaining > 10000 && rideAllowed != false)
   {
     internalLed[0] = CRGB::Green;
     FastLED.show();
   }
-  else if (rideTimeRemaining > 0 && rideTimeRemaining < 3000)
+  else if (rideTimeRemaining > 0 && rideTimeRemaining < 10000 && rideAllowed != false)
   {
     internalLed[0] = CRGB::Orange;
     FastLED.show();
   }
-  if (currentTime > rideEndtTime && currentTime < ledOffTimer)
+  if (currentTime > rideEndtTime && currentTime < ledOffTimer && rideAllowed != false)
   {
     internalLed[0] = CRGB::Red;
     FastLED.show();
@@ -168,13 +171,73 @@ void loop()
   {
     internalLed[0] = CRGB::Black;
     FastLED.show();
+  }
 
-    uint8_t thisSpeed = 10;
-    uint8_t deltaHue= 10;
-    uint8_t thisHue = beat8(thisSpeed,255); 
-    fill_rainbow(externalLeds, NUM_EXTERNAL_LEDS, 0, 7);     
+  /*
+  External LEDS
+  */
+
+  if (rideTimeRemaining > 10000 && rideAllowed != false)
+  {
+    fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Green);
     FastLED.show();
+  }
+  else if (rideTimeRemaining > 0 && rideTimeRemaining < 10000 && rideAllowed != false)
+  {
+    fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Orange);
+    FastLED.show();
+  }
+  if (currentTime > rideEndtTime && currentTime < ledOffTimer && rideAllowed != false)
+  {
+    fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Red);
+    FastLED.show();
+  }
 
+  if (currentTime > ledOffTimer && rideAllowed == 1)
+  {
+
+    /*
+  Ide Animation External LEDS
+  */
+
+    EVERY_N_MILLISECONDS(10)
+    {
+      colorIndex = startIndex;
+      for (int i = 0; i < NUM_EXTERNAL_LEDS; i++)
+      {
+        externalLeds[i] = ColorFromPalette(RainbowColors_p, colorIndex, 255, LINEARBLEND);
+        colorIndex = colorIndex + 10;
+      }
+
+      FastLED.show();
+      startIndex = startIndex + 1;
+    }
+  }
+
+  /*
+  Error Message All LEDS
+  */
+  if (rideAllowed == 0)
+  {
+    EVERY_N_MILLISECONDS(1200)
+    {
+      static boolean errorBlink;
+      errorBlink = !errorBlink;
+      if (errorBlink == 1)
+      {
+        for (int i = 0; i < 7; i++)
+        {
+          externalLeds[i] = CRGB::Red;
+        }
+      }
+      else
+      {
+        for (int i = 0; i < 7; i++)
+        {
+          externalLeds[i] = CRGB::Black;
+        }
+      }
+    }
   }
 
   /*
