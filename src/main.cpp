@@ -32,17 +32,19 @@ Key components are:
 #define debugln(x)
 #endif
 
-#define NUM_LEDS 1       // number of LED´s for FastLed
-#define BRIGHTNESS 16    // set the brightness of the LED`S from 0-255
-#define DATA_PIN1 D0     // PIN for the external Neopixel WS2812B RGB LED for FastLED
-#define DATA_PIN2 5      // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
-#define DEBOUNCE_TIME 25 // the debounce time in milliseconds for the coin acceptor
-#define motorRelais D7   // PIN for the relay module
+#define NUM_INTERNAL_LEDS 1 // number of LED´s for FastLed
+#define NUM_EXTERNAL_LEDS 7 // number of LED´s for FastLed
+#define BRIGHTNESS 16       // set the brightness of the LED`S from 0-255
+#define DATA_PIN1 5         // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
+#define DATA_PIN2 D13       // PIN for the external Neopixel WS2812B RGB LED for FastLED
+#define DEBOUNCE_TIME 25    // the debounce time in milliseconds for the coin acceptor
+#define motorRelais D10     // PIN for the relay module
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
-CRGB leds[NUM_LEDS];                                   // for FastLed
-ezButton coinAcceptor(D2);                             // create ezButton object for the coin acceptor attached to pin D2
-ezButton pedalButton(D3);                              // create ezButton object for the pedal magnetic switch attached to pin D3
+CRGB internalLed[NUM_INTERNAL_LEDS];                   // for FastLed
+CRGB externalLeds[NUM_EXTERNAL_LEDS];                  // for FastLed
+ezButton coinAcceptor(D11);                            // create ezButton object for the coin acceptor attached to pin D2
+ezButton pedalButton(D12);                             // create ezButton object for the pedal magnetic switch attached to pin D3
 
 bool rideAllowed = false;
 
@@ -50,8 +52,8 @@ float voltageReading = 0;        // Voltage reading of the battery
 float batteryCuttOffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;     // minimal Voltage to start a ride
 
-const long ledTimout = 3000;      // LED timeout
-const long rideDuration = 180000; // duration of one ride in milliseconds
+const long ledTimout = 3000;     // LED timeout
+const long rideDuration = 10000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
@@ -63,10 +65,11 @@ void setup()
   Serial.begin(115200);
   coinAcceptor.setDebounceTime(DEBOUNCE_TIME);
   pedalButton.setDebounceTime(DEBOUNCE_TIME);
-  FastLED.addLeds<NEOPIXEL, DATA_PIN1>(leds, NUM_LEDS);
-  FastLED.addLeds<NEOPIXEL, DATA_PIN2>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, DATA_PIN1>(internalLed, NUM_INTERNAL_LEDS);
+  FastLED.addLeds<NEOPIXEL, DATA_PIN2>(externalLeds, NUM_EXTERNAL_LEDS);
   FastLED.setBrightness(BRIGHTNESS);
-  leds[0] = CRGB::Black;
+  internalLed[0] = CRGB::Black;
+  externalLeds[NUM_EXTERNAL_LEDS] = CRGB::Black;
   FastLED.show();
   pinMode(motorRelais, OUTPUT);
   Serial.println("SETUP COMPLETE");
@@ -142,28 +145,28 @@ void loop()
   }
 
   /*
-  Status LED
+  Status Internal LED
   */
 
   if (rideTimeRemaining > 3000)
   {
-    leds[0] = CRGB::Green;
+    internalLed[0] = CRGB::Green;
     FastLED.show();
   }
   else if (rideTimeRemaining > 0 && rideTimeRemaining < 3000)
   {
-    leds[0] = CRGB::Orange;
+    internalLed[0] = CRGB::Orange;
     FastLED.show();
   }
   if (currentTime > rideEndtTime && currentTime < ledOffTimer)
   {
-    leds[0] = CRGB::Red;
+    internalLed[0] = CRGB::Red;
     FastLED.show();
   }
 
   if (currentTime > ledOffTimer)
   {
-    leds[0] = CRGB::Black;
+    internalLed[0] = CRGB::Black;
     FastLED.show();
   }
 
@@ -182,6 +185,7 @@ Wattmeter
     debug("Ride Allowed:      ");
     debugln(rideAllowed);
     debugln("");
+
     lastWattmeterReading = currentTime + 5000;
   }
   if (voltageReading > batteryLowVoltage)
