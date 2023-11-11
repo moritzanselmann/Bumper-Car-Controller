@@ -168,6 +168,13 @@ void loop()
   {
     internalLed[0] = CRGB::Black;
     FastLED.show();
+
+    uint8_t thisSpeed = 10;
+    uint8_t deltaHue= 10;
+    uint8_t thisHue = beat8(thisSpeed,255); 
+    fill_rainbow(externalLeds, NUM_EXTERNAL_LEDS, 0, 7);     
+    FastLED.show();
+
   }
 
   /*
