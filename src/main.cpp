@@ -38,7 +38,7 @@ Key components are:
 #define DATA_PIN1 5         // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DATA_PIN2 D13       // PIN for the external Neopixel WS2812B RGB LED for FastLED
 #define DEBOUNCE_TIME 25    // the debounce time in milliseconds for the coin acceptor
-#define motorRelay D10     // PIN for the relay module
+#define motorRelay D10      // PIN for the relay module
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
 CRGB internalLed[NUM_INTERNAL_LEDS];                   // for FastLed
@@ -48,9 +48,9 @@ ezButton pedalButton(D12);                             // create ezButton object
 
 bool rideAllowed = false;
 
-float voltageReading = 0;        // Voltage reading of the battery
+float voltageReading = 0;       // Voltage reading of the battery
 float batteryCutoffVoltage = 0; // Voltage to disable the ride
-float batteryLowVoltage = 0;     // minimal Voltage to start a ride
+float batteryLowVoltage = 0;    // minimal Voltage to start a ride
 
 const long ledTimeout = 10000;    // LED timeout
 const long rideDuration = 180000; // duration of one ride in milliseconds
@@ -62,6 +62,10 @@ unsigned long rideRemainingTime = 0;
 
 uint8_t startIndex;
 uint8_t colorIndex;
+
+void idleAnimation1();
+void idleAnimation2();
+void idleAnimation3();
 
 void setup()
 {
@@ -193,25 +197,15 @@ void loop()
     FastLED.show();
   }
 
+  /*
+Idle Animation External LEDS 1, pick one
+*/
+
   if (currentTime > ledOffTimer && rideAllowed == 1)
   {
-
-    /*
-  Idle Animation External LEDS
-  */
-
-    EVERY_N_MILLISECONDS(10)
-    {
-      colorIndex = startIndex;
-      for (int i = 0; i < NUM_EXTERNAL_LEDS; i++)
-      {
-        externalLeds[i] = ColorFromPalette(RainbowColors_p, colorIndex, 255, LINEARBLEND);
-        colorIndex = colorIndex + 10;
-      }
-
-      FastLED.show();
-      startIndex = startIndex + 1;
-    }
+    idleAnimation1();
+    // idleAnimation2();
+    // idleAnimation3();
   }
 
   /*
@@ -242,8 +236,8 @@ void loop()
   }
 
   /*
-Wattmeter
-*/
+  Wattmeter
+  */
 
   if (lastWattmeterReading < currentTime)
   {
@@ -268,4 +262,51 @@ Wattmeter
     rideAllowed = false;
     digitalWrite(motorRelay, LOW);
   }
+}
+
+void idleAnimation1()
+{
+  uint16_t beatA = beatsin16(30, 0, 255);
+  uint16_t beatB = beatsin16(20, 0, 255);
+  fill_rainbow(externalLeds, NUM_EXTERNAL_LEDS, (beatA + beatB) / 2, 8);
+
+  FastLED.show();
+
+  FastLED.show();
+}
+
+void idleAnimation2()
+{
+  EVERY_N_MILLISECONDS(10)
+  {
+    colorIndex = startIndex;
+    for (int i = 0; i < NUM_EXTERNAL_LEDS; i++)
+    {
+      externalLeds[i] = ColorFromPalette(RainbowColors_p, colorIndex, 255, LINEARBLEND);
+      colorIndex = colorIndex + 10;
+    }
+
+    FastLED.show();
+    startIndex = startIndex + 1;
+  }
+}
+
+void idleAnimation3()
+{
+  uint16_t x;
+  int scale;
+  uint16_t t;
+
+  x = 0;
+  t = millis() / 5;
+  scale = beatsin8(10, 10, 30);
+
+  for (int i = 0; i < NUM_EXTERNAL_LEDS; i++)
+  {
+    uint8_t noise = inoise8(i * scale + x, t);
+    uint8_t hue = map(noise, 50, 190, 0, 255);
+    externalLeds[i] = CHSV(hue, 255, 255);
+  }
+
+  FastLED.show();
 }
