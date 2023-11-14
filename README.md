@@ -21,7 +21,7 @@ These are the key compnents used.
 - Magnetic contact switch for the pedal
 
 
-### Wirering diagram
+### Wiring diagram
 
 ![Screenshot](BumperCarDiagram.png)
 
