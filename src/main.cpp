@@ -34,7 +34,7 @@ Key components are:
 
 #define NUM_INTERNAL_LEDS 1 // number of LED´s for FastLed
 #define NUM_EXTERNAL_LEDS 7 // number of LED´s for FastLed
-#define BRIGHTNESS 16       // set the brightness of the LED`S from 0-255
+#define BRIGHTNESS 32       // set the brightness of the LED`S from 0-255
 #define DATA_PIN1 5         // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DATA_PIN2 D13       // PIN for the external Neopixel WS2812B RGB LED for FastLED
 #define DEBOUNCE_TIME 25    // the debounce time in milliseconds for the coin acceptor
@@ -215,8 +215,9 @@ void loop()
   }
 
   /*
-  Error Message All LEDS
+  Error Message External LEDS
   */
+
   if (rideAllowed == 0)
   {
     EVERY_N_MILLISECONDS(1200)
