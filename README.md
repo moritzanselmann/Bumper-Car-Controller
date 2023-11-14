@@ -24,3 +24,15 @@ These are the key compnents used.
 ### Wirering diagram
 
 ![Screenshot](BumperCarDiagram.png)
+
+
+### Definitions
+
+Important definitions to change in main.cpp
+
+- `#define DEBUG` This willprint debug messages on the serial monitor. Set to 1 to enable or 0 to disable.
+- `#define NUM_EXTERNAL_LEDS` Set the number of LEDs connected.
+- `#define BRIGHTNESS` Set the brightness for all LEDs to a value between 0 and 255.
+- `float batteryCuttOffVoltage` This defines the voltage to disable the car to protect the battery from discharging too low.
+- `float batteryLowVoltage` Set the minimum voltage of the battery required to start a ride.
+- `const long rideDuration` This is the duration of one ride in milliseconds.
