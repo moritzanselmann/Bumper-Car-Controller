@@ -23,3 +23,4 @@ These are the key compnents used.
 
 ### Wirering diagram
 
+![Screenshot](BumperCarDiagram.png)
