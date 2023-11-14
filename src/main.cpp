@@ -32,13 +32,13 @@ Key components are:
 #define debugln(x)
 #endif
 
-#define NUM_INTERNAL_LEDS 1 // number of LED´s for FastLed
-#define NUM_EXTERNAL_LEDS 7 // number of LED´s for FastLed
+#define NUM_INTERNAL_LEDS 1 // number of LEDs for FastLed
+#define NUM_EXTERNAL_LEDS 7 // number of LEDs for FastLed
 #define BRIGHTNESS 32       // set the brightness of the LED`S from 0-255
 #define DATA_PIN1 5         // PIN for the builtin RGB LED of the FireBeetle 2 for FastLED
 #define DATA_PIN2 D13       // PIN for the external Neopixel WS2812B RGB LED for FastLED
 #define DEBOUNCE_TIME 25    // the debounce time in milliseconds for the coin acceptor
-#define motorRelais D10     // PIN for the relay module
+#define motorRelay D10     // PIN for the relay module
 
 DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4); // DFRobot I2C Digital Wattmeter
 CRGB internalLed[NUM_INTERNAL_LEDS];                   // for FastLed
@@ -49,16 +49,16 @@ ezButton pedalButton(D12);                             // create ezButton object
 bool rideAllowed = false;
 
 float voltageReading = 0;        // Voltage reading of the battery
-float batteryCuttOffVoltage = 0; // Voltage to disable the ride
+float batteryCutoffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;     // minimal Voltage to start a ride
 
-const long ledTimout = 10000;    // LED timeout
+const long ledTimeout = 10000;    // LED timeout
 const long rideDuration = 180000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
-unsigned long rideEndtTime = 0;
-unsigned long rideTimeRemaining = 0;
+unsigned long rideEndTime = 0;
+unsigned long rideRemainingTime = 0;
 
 uint8_t startIndex;
 uint8_t colorIndex;
@@ -74,7 +74,7 @@ void setup()
   internalLed[0] = CRGB::Black;
   externalLeds[NUM_EXTERNAL_LEDS] = CRGB::Black;
   FastLED.show();
-  pinMode(motorRelais, OUTPUT);
+  pinMode(motorRelay, OUTPUT);
   Serial.println("SETUP COMPLETE");
   Serial.println(" ");
 }
@@ -90,35 +90,35 @@ void loop()
   checks if the duration of the ride has passed
   */
 
-  if (currentTime > rideEndtTime)
+  if (currentTime > rideEndTime)
   {
-    rideTimeRemaining = 0;
-    digitalWrite(motorRelais, LOW); // if durartion has passed the motor will be disabled
+    rideRemainingTime = 0;
+    digitalWrite(motorRelay, LOW); // if duration has passed the motor will be disabled
   }
   else
   {
-    rideTimeRemaining = rideEndtTime - currentTime; // updates the time remaining until the ride ends
+    rideRemainingTime = rideEndTime - currentTime; // updates the time remaining until the ride ends
   }
 
   /*
-  Coin Acceptor, starts the ride or extends one if allready running
+  Coin Acceptor, starts the ride or extends one if already running
   */
 
   if (coinAcceptor.isPressed() && rideAllowed != false)
   {
-    if (currentTime < rideEndtTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
+    if (currentTime < rideEndTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
     {
-      rideTimeRemaining = rideEndtTime + rideDuration;
-      rideEndtTime = rideTimeRemaining;
-      ledOffTimer = rideEndtTime + ledTimout;
+      rideRemainingTime = rideEndTime + rideDuration;
+      rideEndTime = rideRemainingTime;
+      ledOffTimer = rideEndTime + ledTimeout;
       debug("Timer has extended. New time remaining ");
-      debugln((rideEndtTime - currentTime) / 1000);
+      debugln((rideEndTime - currentTime) / 1000);
     }
     else // starts the ride if no ride is active
     {
-      rideEndtTime = currentTime + rideDuration;
-      rideTimeRemaining = rideEndtTime - currentTime;
-      ledOffTimer = rideEndtTime + ledTimout;
+      rideEndTime = currentTime + rideDuration;
+      rideRemainingTime = rideEndTime - currentTime;
+      ledOffTimer = rideEndTime + ledTimeout;
       debug("Timer has started. Time Remaining ");
       debugln(rideDuration / 1000);
     }
@@ -130,11 +130,11 @@ void loop()
 
   if (pedalButton.isPressed() && rideAllowed != false) // if the pedal is pressed and a ride is running
   {
-    if (rideTimeRemaining != 0)
+    if (rideRemainingTime != 0)
     {
-      digitalWrite(motorRelais, HIGH);
+      digitalWrite(motorRelay, HIGH);
       debug("Pedal is pressed. Time remaining ");
-      debugln(rideTimeRemaining / 1000);
+      debugln(rideRemainingTime / 1000);
     }
     else
     {
@@ -144,24 +144,24 @@ void loop()
 
   if (pedalButton.isReleased())
   {
-    digitalWrite(motorRelais, LOW);
+    digitalWrite(motorRelay, LOW);
   }
 
   /*
   Status Internal LED
   */
 
-  if (rideTimeRemaining > 10000 && rideAllowed != false)
+  if (rideRemainingTime > 10000 && rideAllowed != false)
   {
     internalLed[0] = CRGB::Green;
     FastLED.show();
   }
-  else if (rideTimeRemaining > 0 && rideTimeRemaining < 10000 && rideAllowed != false)
+  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && rideAllowed != false)
   {
     internalLed[0] = CRGB::Orange;
     FastLED.show();
   }
-  if (currentTime > rideEndtTime && currentTime < ledOffTimer && rideAllowed != false)
+  if (currentTime > rideEndTime && currentTime < ledOffTimer && rideAllowed != false)
   {
     internalLed[0] = CRGB::Red;
     FastLED.show();
@@ -177,17 +177,17 @@ void loop()
   External LEDS
   */
 
-  if (rideTimeRemaining > 10000 && rideAllowed != false)
+  if (rideRemainingTime > 10000 && rideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Green);
     FastLED.show();
   }
-  else if (rideTimeRemaining > 0 && rideTimeRemaining < 10000 && rideAllowed != false)
+  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && rideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Orange);
     FastLED.show();
   }
-  if (currentTime > rideEndtTime && currentTime < ledOffTimer && rideAllowed != false)
+  if (currentTime > rideEndTime && currentTime < ledOffTimer && rideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Red);
     FastLED.show();
@@ -197,7 +197,7 @@ void loop()
   {
 
     /*
-  Ide Animation External LEDS
+  Idle Animation External LEDS
   */
 
     EVERY_N_MILLISECONDS(10)
@@ -263,9 +263,9 @@ Wattmeter
   {
     rideAllowed = true;
   }
-  if (voltageReading < batteryCuttOffVoltage)
+  if (voltageReading < batteryCutoffVoltage)
   {
     rideAllowed = false;
-    digitalWrite(motorRelais, LOW);
+    digitalWrite(motorRelay, LOW);
   }
 }
