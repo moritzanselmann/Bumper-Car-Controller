@@ -10,7 +10,7 @@ Key components are:
               DFRobot Gravity: IO Shield for FireBeetle 2 https://www.dfrobot.com/product-2395.html
               DFRobot Gravity: I2C Digital Wattmeter https://www.dfrobot.com/product-1827.html
               DFRobot Gravity: Digital 10A Relay Module https://www.dfrobot.com/product-1572.html
-              DD2712SA 2.5A DC DC Step Down Converter Module
+              DD2712SA 6.5-27V 2.5A DC DC Step Down Converter Module
               Neopixel WS2812B RGB LED
               generic coin acceptor
               magnetic contact switch for the pedal

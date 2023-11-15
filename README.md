@@ -16,7 +16,7 @@ These are the key compnents used.
 - [DFRobot Gravity: I2C Digital Wattmeter](https://www.dfrobot.com/product-1827.html)
 - [DFRobot Gravity: Digital 10A Relay Module](https://www.dfrobot.com/product-1572.html)
 - WS2812B RGB LEDs
-- DD2712SA 2.5A DC DC Step Down Converter Module
+- DD2712SA 6.5-27V 2.5A DC DC Step Down Converter Module
 - Generic coin acceptor
 - Magnetic contact switch for the pedal
 
