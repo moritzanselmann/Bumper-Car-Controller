@@ -30,7 +30,7 @@ These are the key compnents used.
 
 Important definitions to change in main.cpp
 
-- `#define DEBUG` This willprint debug messages on the serial monitor. Set to 1 to enable or 0 to disable.
+- `#define DEBUG` This will print debug messages on the serial monitor. Set to 1 to enable or 0 to disable.
 - `#define NUM_EXTERNAL_LEDS` Set the number of LEDs connected.
 - `#define BRIGHTNESS` Set the brightness for all LEDs to a value between 0 and 255.
 - `float batteryCutoffVoltage` This defines the voltage to disable the car to protect the battery from discharging too low.
