@@ -46,18 +46,18 @@ CRGB externalLeds[NUM_EXTERNAL_LEDS];                  // for FastLed
 ezButton coinAcceptor(D11);                            // create ezButton object for the coin acceptor attached to pin D2
 ezButton pedalButton(D12);                             // create ezButton object for the pedal magnetic switch attached to pin D3
 
-bool rideAllowed = false;
+bool isRideAllowed = false;
 
-float voltageReading = 0;       // Voltage reading of the battery
+float batteryVoltageReading = 0;       // Voltage reading of the battery
 float batteryCutoffVoltage = 0; // Voltage to disable the ride
 float batteryLowVoltage = 0;    // minimal Voltage to start a ride
 
-const long ledTimeout = 10000;    // LED timeout
+const long ledOffDelay = 10000;    // LED timeout
 const long rideDuration = 180000; // duration of one ride in milliseconds
 
 unsigned long lastWattmeterReading = 0;
 unsigned long ledOffTimer = 0;
-unsigned long rideEndTime = 0;
+unsigned long rideExpirationTime = 0;
 unsigned long rideRemainingTime = 0;
 
 uint8_t startIndex;
@@ -94,35 +94,35 @@ void loop()
   checks if the duration of the ride has passed
   */
 
-  if (currentTime > rideEndTime)
+  if (currentTime > rideExpirationTime)
   {
     rideRemainingTime = 0;
     digitalWrite(motorRelay, LOW); // if duration has passed the motor will be disabled
   }
   else
   {
-    rideRemainingTime = rideEndTime - currentTime; // updates the time remaining until the ride ends
+    rideRemainingTime = rideExpirationTime - currentTime; // updates the time remaining until the ride ends
   }
 
   /*
   Coin Acceptor, starts the ride or extends one if already running
   */
 
-  if (coinAcceptor.isPressed() && rideAllowed != false)
+  if (coinAcceptor.isPressed() && isRideAllowed != false)
   {
-    if (currentTime < rideEndTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
+    if (currentTime < rideExpirationTime) // extends the duration of the ride by the value set for rideDuration if a ride is active
     {
-      rideRemainingTime = rideEndTime + rideDuration;
-      rideEndTime = rideRemainingTime;
-      ledOffTimer = rideEndTime + ledTimeout;
+      rideRemainingTime = rideExpirationTime + rideDuration;
+      rideExpirationTime = rideRemainingTime;
+      ledOffTimer = rideExpirationTime + ledOffDelay;
       debug("Timer has extended. New time remaining ");
-      debugln((rideEndTime - currentTime) / 1000);
+      debugln((rideExpirationTime - currentTime) / 1000);
     }
     else // starts the ride if no ride is active
     {
-      rideEndTime = currentTime + rideDuration;
-      rideRemainingTime = rideEndTime - currentTime;
-      ledOffTimer = rideEndTime + ledTimeout;
+      rideExpirationTime = currentTime + rideDuration;
+      rideRemainingTime = rideExpirationTime - currentTime;
+      ledOffTimer = rideExpirationTime + ledOffDelay;
       debug("Timer has started. Time Remaining ");
       debugln(rideDuration / 1000);
     }
@@ -132,7 +132,7 @@ void loop()
   Pedal Button, control the relay module with the pedal to drive the car
   */
 
-  if (pedalButton.isPressed() && rideAllowed != false) // if the pedal is pressed and a ride is running
+  if (pedalButton.isPressed() && isRideAllowed != false) // if the pedal is pressed and a ride is running
   {
     if (rideRemainingTime != 0)
     {
@@ -155,17 +155,17 @@ void loop()
   Status Internal LED
   */
 
-  if (rideRemainingTime > 10000 && rideAllowed != false)
+  if (rideRemainingTime > 10000 && isRideAllowed != false)
   {
     internalLed[0] = CRGB::Green;
     FastLED.show();
   }
-  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && rideAllowed != false)
+  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && isRideAllowed != false)
   {
     internalLed[0] = CRGB::Orange;
     FastLED.show();
   }
-  if (currentTime > rideEndTime && currentTime < ledOffTimer && rideAllowed != false)
+  if (currentTime > rideExpirationTime && currentTime < ledOffTimer && isRideAllowed != false)
   {
     internalLed[0] = CRGB::Red;
     FastLED.show();
@@ -181,17 +181,17 @@ void loop()
   External LEDS
   */
 
-  if (rideRemainingTime > 10000 && rideAllowed != false)
+  if (rideRemainingTime > 10000 && isRideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Green);
     FastLED.show();
   }
-  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && rideAllowed != false)
+  else if (rideRemainingTime > 0 && rideRemainingTime < 10000 && isRideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Orange);
     FastLED.show();
   }
-  if (currentTime > rideEndTime && currentTime < ledOffTimer && rideAllowed != false)
+  if (currentTime > rideExpirationTime && currentTime < ledOffTimer && isRideAllowed != false)
   {
     fill_solid(externalLeds, NUM_EXTERNAL_LEDS, CRGB::Red);
     FastLED.show();
@@ -201,7 +201,7 @@ void loop()
 Idle Animation External LEDS 1, pick one
 */
 
-  if (currentTime > ledOffTimer && rideAllowed == 1)
+  if (currentTime > ledOffTimer && isRideAllowed == 1)
   {
     idleAnimation1();
     // idleAnimation2();
@@ -212,7 +212,7 @@ Idle Animation External LEDS 1, pick one
   Error Message External LEDS
   */
 
-  if (rideAllowed == 0)
+  if (isRideAllowed == 0)
   {
     EVERY_N_MILLISECONDS(1200)
     {
@@ -245,21 +245,21 @@ Idle Animation External LEDS 1, pick one
     debug(ina219.getBusVoltage_V());
     debugln("V");
 
-    voltageReading = ina219.getBusVoltage_V();
+    batteryVoltageReading = ina219.getBusVoltage_V();
 
     debug("Ride Allowed:      ");
-    debugln(rideAllowed);
+    debugln(isRideAllowed);
     debugln("");
 
     lastWattmeterReading = currentTime + 5000;
   }
-  if (voltageReading > batteryLowVoltage)
+  if (batteryVoltageReading > batteryLowVoltage)
   {
-    rideAllowed = true;
+    isRideAllowed = true;
   }
-  if (voltageReading < batteryCutoffVoltage)
+  if (batteryVoltageReading < batteryCutoffVoltage)
   {
-    rideAllowed = false;
+    isRideAllowed = false;
     digitalWrite(motorRelay, LOW);
   }
 }

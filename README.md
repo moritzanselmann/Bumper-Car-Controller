@@ -1,7 +1,7 @@
 # Bumper Car Controller
 
 Project to control a bumper car using a ESP32 microcontroller.
-The car is using a 12V car battery to run a Bosch starter Motor.
+The car is using a 12V car battery to run a Bosch starter motor.
 When a coin is inserted in a coin acceptor a pedal becomes active to drive the car.
 
 
